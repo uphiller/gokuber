@@ -17,7 +17,7 @@ func setupRouter() *gin.Engine {
 
 func main() {
 	r := setupRouter()
-	r.Run(":5001")
+	r.Run(":5000")
 }
 
 func health(c *gin.Context) {
