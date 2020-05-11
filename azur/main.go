@@ -34,16 +34,14 @@ func health(c *gin.Context) {
 }
 
 func GetVM(c *gin.Context) {
-	vmName := "kube-dev"
 	vmClient := getVMClient()
 	ctx, cancel := context.WithTimeout(context.Background(), 6000*time.Second)
 	defer cancel()
-	info, _ := vmClient.Get(ctx, GroupName(), vmName, compute.InstanceView)
+	info, _ := vmClient.List(ctx, GroupName())
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": info,
+		"message": info.Values(),
 	})
-	//return vmClient.Get(ctx, GroupName(), vmName, compute.InstanceView)
 }
 
 func getVMClient() compute.VirtualMachinesClient {

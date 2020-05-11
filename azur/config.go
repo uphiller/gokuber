@@ -17,12 +17,12 @@ var (
 	clientSecret           string = "sLEjVIVGLu]@olj/y9:xCq2OTta758cZ"
 	tenantID               string = "96fe0bf7-70bb-4a02-be1c-a37e898345ea"
 	subscriptionID         string = "e8fe9bd4-424f-4247-b815-2c84e7c3d0a8"
-	locationDefault        string = "Korea Central"
+	locationDefault        string
 	authorizationServerURL string
 	cloudName              string = "AzurePublicCloud"
 	useDeviceFlow          bool
 	keepResources          bool
-	groupName              string // deprecated, use baseGroupName instead
+	groupName              string = "gokubermanagement-resource"
 	baseGroupName          string
 	userAgent              string
 	environment            *azure.Environment
