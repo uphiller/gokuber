@@ -8,18 +8,34 @@ import (
 	"github.com/Azure/go-autorest/autorest/adal"
 	"github.com/Azure/go-autorest/autorest/azure/auth"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql" // configures mysql driver
 	"net/http"
+	"pc/azur/database/models"
 	"time"
 )
 
 func setupRouter() *gin.Engine {
-	r := gin.Default()
-	v1 := r.Group("/v1")
+	router := gin.Default()
+	v1 := router.Group("/v1")
 	{
 		v1.GET("/health", health)
 		v1.GET("/vms", GetVM)
+		v1.POST("/info", setInfo)
 	}
-	return r
+	//router.Use(cors.Default())
+	return router
+}
+
+var db *gorm.DB
+
+func init() {
+	var err error
+	db, err = gorm.Open("mysql", "root:1234@/gokuber_azur?charset=utf8&parseTime=True&loc=Local")
+	if err != nil {
+		panic("failed to connect database")
+	}
+
 }
 
 func main() {
@@ -127,4 +143,26 @@ func grantType() OAuthGrantType {
 		return OAuthGrantTypeDeviceFlow
 	}
 	return OAuthGrantTypeServicePrincipal
+}
+
+type Resource = models.Resource
+type Info = models.Info
+
+func setInfo(c *gin.Context) {
+	type RequestBody struct {
+		SubscriptionId string `json:"subscriptionId" binding:"required"`
+		ClientId       string `json:"clientId" binding:"required"`
+		ClientSecret   string `json:"clientSecret" binding:"required"`
+		TenantId       string `json:"tenantId" binding:"required"`
+	}
+	var requestBody RequestBody
+	if err := c.BindJSON(&requestBody); err != nil {
+		c.AbortWithStatus(400)
+		return
+	}
+
+	resource := Info{SubscriptionId: requestBody.SubscriptionId, ClientId: requestBody.ClientId, ClientSecret: requestBody.ClientSecret, TenantId: requestBody.TenantId}
+	db.NewRecord(resource)
+	db.Create(&resource)
+	c.JSON(200, "ok")
 }
