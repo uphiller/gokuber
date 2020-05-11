@@ -7,13 +7,13 @@ import (
 
 type Resource struct {
 	gorm.Model
-	idx  uint
-	name string `sql:"type:text;"`
+	Idx  uint
+	Name string `sql:"type:text;"`
 }
 
 func (p Resource) Serialize() common.JSON {
 	return common.JSON{
-		"idx":  p.idx,
-		"name": p.name,
+		"idx":  p.Idx,
+		"name": p.Name,
 	}
 }
