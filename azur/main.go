@@ -23,7 +23,10 @@ func setupRouter() *gin.Engine {
 		v1.GET("/vms", GetVM)
 		v1.POST("/info", setInfo)
 	}
+
+	//add cors
 	//router.Use(cors.Default())
+
 	return router
 }
 
@@ -35,7 +38,6 @@ func init() {
 	if err != nil {
 		panic("failed to connect database")
 	}
-
 }
 
 func main() {
