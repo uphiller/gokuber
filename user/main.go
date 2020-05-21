@@ -13,7 +13,7 @@ func setupRouter() *gin.Engine {
 	{
 		v1.GET("/health", health)
 		v1.GET("/login", login)
-		v1.GET("/callback", user)
+		v1.GET("/callback", callback)
 	}
 	return r
 }
@@ -30,27 +30,46 @@ func health(c *gin.Context) {
 }
 
 func login(c *gin.Context) {
-
-	provider, err := oidc.NewProvider(c, "http://localhost:8080/auth/realms/master/account/")
+	var provider, err = oidc.NewProvider(c, "http://localhost:8080/auth/realms/master")
 	if err != nil {
-		// handle error
+		return
 	}
-	oauth2Config := oauth2.Config{
-		ClientID:     "Gokubermanagement-user",
+	var oauth2Config = oauth2.Config{
+		ClientID:     "gokubermanagement-user",
 		ClientSecret: "b53f3ca6-0559-4781-a9ee-a35cb0d7a64a",
-		RedirectURL:  "http://localhost:5000/user/callback",
-
-		// Discovery returns the OAuth2 endpoints.
-		Endpoint: provider.Endpoint(),
-
-		// "openid" is a required scope for OpenID Connect flows.
-		Scopes: []string{oidc.ScopeOpenID, "profile", "email"},
+		RedirectURL:  "http://localhost:5000/v1/user/callback",
+		Endpoint:     provider.Endpoint(),
+		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
 	}
-	c.Redirect(http.StatusMovedPermanently, oauth2Config.AuthCodeURL("abc"))
+	c.Redirect(http.StatusMovedPermanently, oauth2Config.AuthCodeURL("login"))
 }
 
-func user(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "user",
-	})
+func callback(c *gin.Context) {
+	var provider, err = oidc.NewProvider(c, "http://localhost:8080/auth/realms/master")
+	if err != nil {
+		return
+	}
+	var oauth2Config = oauth2.Config{
+		ClientID:     "gokubermanagement-user",
+		ClientSecret: "b53f3ca6-0559-4781-a9ee-a35cb0d7a64a",
+		RedirectURL:  "http://localhost:5000/v1/user/callback",
+		Endpoint:     provider.Endpoint(),
+		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
+	}
+
+	oauth2Token, err := oauth2Config.Exchange(c, c.Request.URL.Query().Get("code"))
+	if err != nil {
+		return
+	}
+
+	userInfo, err := provider.UserInfo(c, oauth2.StaticTokenSource(oauth2Token))
+	if err != nil {
+		return
+	}
+
+	resp := struct {
+		OAuth2Token *oauth2.Token
+		UserInfo    *oidc.UserInfo
+	}{oauth2Token, userInfo}
+	c.JSON(http.StatusOK, resp)
 }
