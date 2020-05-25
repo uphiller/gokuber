@@ -29,12 +29,13 @@ func getBasicAuthForClient(clientId string, clientSecret string) string {
 func TestLoginPassword(t *testing.T) {
 	resp, err := resty.R().
 		SetHeader("Content-Type", "application/x-www-form-urlencoded").
-		SetHeader("Authorization", getBasicAuthForClient("gokubermanagement-user", "b53f3ca6-0559-4781-a9ee-a35cb0d7a64a")).
 		SetFormData(map[string]string{
-			"grant_type": "password",
-			"username":   "tester",
-			"password":   "1234",
-		}).Post("http://localhost:8080/auth/realms/master/protocol/openid-connect/token")
+			"grant_type":    "password",
+			"username":      "admin",
+			"password":      "admin",
+			"client_id":     "gokuber-user",
+			"client_secret": "7a0cc26b-1bae-43b1-8c7f-15676108faab",
+		}).Post("http://kubernetes.docker.internal/auth/realms/master/protocol/openid-connect/token")
 	if err != nil {
 		print(err)
 	}
