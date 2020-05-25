@@ -5,11 +5,33 @@ import * as service from '../../../rest';
 
 class Login extends Component {
 
-  fetchPostInfo = async (id, pw) => {
-    const post = await service.postLogin(id, pw);
+  constructor(props) {
+    super(props);
+    this.state  = {
+      name: '',
+      password: '',
+    };
+    this.handleLogin = this.handleLogin.bind(this);
+    this.handleNameChange = this.handleNameChange.bind(this);
+    this.handlePasswordChange = this.handlePasswordChange.bind(this);
+  }
+
+  handleLogin = async () => {
+    const post = await service.postLogin(this.state);
+  }
+
+  handleNameChange(e){
+    e.preventDefault();
+    this.setState({name:e.target.value})
+  }
+
+  handlePasswordChange(e){
+    e.preventDefault();
+    this.setState({password:e.target.value})
   }
 
   render() {
+
     return (
       <div className="app flex-row align-items-center">
         <Container>
@@ -27,7 +49,7 @@ class Login extends Component {
                             <i className="icon-user"></i>
                           </InputGroupText>
                         </InputGroupAddon>
-                        <Input type="text" placeholder="Username" autoComplete="username" />
+                        <Input type="text" placeholder="Username" autoComplete="username"  value={this.state.name} onChange={this.handleNameChange}/>
                       </InputGroup>
                       <InputGroup className="mb-4">
                         <InputGroupAddon addonType="prepend">
@@ -35,11 +57,11 @@ class Login extends Component {
                             <i className="icon-lock"></i>
                           </InputGroupText>
                         </InputGroupAddon>
-                        <Input type="password" placeholder="Password" autoComplete="current-password" />
+                        <Input type="password" placeholder="Password" autoComplete="current-password" value={this.props.password} onChange={this.handlePasswordChange}/>
                       </InputGroup>
                       <Row>
                         <Col xs="6">
-                          <Button color="primary" className="px-4" onClick={this.fetchPostInfo}>Login</Button>
+                          <Button color="primary" className="px-4" onClick={this.handleLogin} >Login</Button>
                         </Col>
                         <Col xs="6" className="text-right">
                           <Button color="link" className="px-0">Forgot password?</Button>

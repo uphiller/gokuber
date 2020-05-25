@@ -11,6 +11,11 @@ import (
 	"net/http"
 )
 
+type LoginCommand struct {
+	Name     string `json:"name"`
+	Password string `json:"password"`
+}
+
 func setupRouter() *gin.Engine {
 	r := gin.Default()
 	r.Use(cors.Default())
@@ -18,7 +23,7 @@ func setupRouter() *gin.Engine {
 	v1 := r.Group("/v1/auth")
 	{
 		v1.GET("/health", health)
-		v1.GET("/login", login)
+		v1.POST("/login", login)
 	}
 
 	v1.Use(VerifyToken)
@@ -81,12 +86,15 @@ func health(c *gin.Context) {
 }
 
 func login(c *gin.Context) {
+	var loginCmd LoginCommand
+	c.BindJSON(&loginCmd)
+
 	resp, err := resty.R().
 		SetHeader("Content-Type", "application/x-www-form-urlencoded").
 		SetFormData(map[string]string{
 			"grant_type":    "password",
-			"username":      "admin",
-			"password":      "admin",
+			"username":      loginCmd.Name,
+			"password":      loginCmd.Password,
 			"client_id":     "gokuber",
 			"client_secret": "5a91013b-8c1b-4c67-92c2-920ed10d9258",
 		}).Post("http://kubernetes.docker.internal:8080/auth/realms/master/protocol/openid-connect/token")
@@ -95,7 +103,14 @@ func login(c *gin.Context) {
 	}
 	var result map[string]interface{}
 	if err := json.Unmarshal(resp.Body(), &result); err != nil {
-
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"result": err,
+		})
+	}
+	if result["error"] != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"result": err,
+		})
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"result": result,
