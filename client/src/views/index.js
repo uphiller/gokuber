@@ -29,5 +29,6 @@ import Widgets from './Widgets';
 
 export {
   Login,
+  Dashboard,
 };
 

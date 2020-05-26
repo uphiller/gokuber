@@ -18,7 +18,11 @@ type LoginCommand struct {
 
 func setupRouter() *gin.Engine {
 	r := gin.Default()
-	r.Use(cors.Default())
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	config.AllowCredentials = true
+	config.AddAllowHeaders("authorization")
+	r.Use(cors.New(config))
 	r.Use(ginsession.New())
 	v1 := r.Group("/v1/auth")
 	{
@@ -112,9 +116,7 @@ func login(c *gin.Context) {
 			"result": err,
 		})
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"result": result,
-	})
+	c.JSON(http.StatusOK, result)
 }
 
 func current(c *gin.Context) {

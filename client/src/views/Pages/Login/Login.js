@@ -16,8 +16,13 @@ class Login extends Component {
     this.handlePasswordChange = this.handlePasswordChange.bind(this);
   }
 
-  handleLogin = async () => {
-    const post = await service.postLogin(this.state);
+  handleLogin = async ({ history }) => {
+    const response = await service.postLogin(this.state);
+    localStorage.setItem(
+      "userInfo",
+      JSON.stringify(response.data)
+    );
+    this.props.history.push('/dashboard');
   }
 
   handleNameChange(e){
