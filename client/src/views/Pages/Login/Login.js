@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Card, CardBody, CardGroup, Col, Container, Form, Input, InputGroup, InputGroupAddon, InputGroupText, Row } from 'reactstrap';
 import * as service from '../../../rest';
+import {NotificationManager} from 'react-notifications';
 
 class Login extends Component {
 
@@ -16,13 +17,19 @@ class Login extends Component {
     this.handlePasswordChange = this.handlePasswordChange.bind(this);
   }
 
-  handleLogin = async ({ history }) => {
+  handleLogin = async () => {
     const response = await service.postLogin(this.state);
-    localStorage.setItem(
-      "userInfo",
-      JSON.stringify(response.data)
-    );
-    this.props.history.push('/dashboard');
+    if(response.status == 401){
+      NotificationManager.error('Error message', 'Click me!', 5000, () => {
+        alert('callback');
+      });
+    } else {
+      localStorage.setItem(
+        "userInfo",
+        JSON.stringify(response.data)
+      );
+      this.props.history.push('/dashboard');
+    }
   }
 
   handleNameChange(e){
