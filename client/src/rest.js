@@ -11,3 +11,9 @@ export function postLogin(state) {
     return error.response;
   });
 }
+
+export function getGcpClusters() {
+  return axios.get('http://localhost:5001/v1/gcp/clusters').catch(function (error) {
+    return error.response;
+  });
+}
