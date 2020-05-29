@@ -6,7 +6,10 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	ginsession "github.com/go-session/gin-session"
+	"github.com/jinzhu/gorm"
 	"net/http"
+	"pc/gcp/Config"
+	"pc/gcp/Models"
 )
 
 func setupRouter() *gin.Engine {
@@ -67,12 +70,23 @@ func VerifyToken(c *gin.Context) {
 }
 
 func main() {
+	Config.DB, _ = gorm.Open("mysql", "root:1234@tcp(127.0.0.1:3306)/gcp?charset=utf8&parseTime=True&loc=Local")
+	defer Config.DB.Close()
+	Config.DB.AutoMigrate(&Models.Cluster{})
+
 	r := setupRouter()
 	r.Run(":5001")
 }
 
 func list(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "ok",
-	})
+	var cluster []Models.Cluster
+	err := Models.GetAllCluster(&cluster)
+	if err == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"clusters": cluster,
+		})
+	}
 }
+
+//https://github.com/dedidot/gorm-gin
+//https://gorm.io/

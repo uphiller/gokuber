@@ -10,17 +10,18 @@ class Tables extends Component {
     this.state = {
       error: null,
       isLoaded: false,
-      items: []
+      clusters: []
     };
   }
 
-  async  componentDidMount() {
-    let response = service.getGcpClusters(this.state);
-    console.log(response);
+  async componentDidMount() {
+    let response = await service.getGcpClusters(this.state);
+    this.setState({
+      clusters: response.data.clusters
+    });
   }
 
   render() {
-    const elements = ['one', 'two', 'three'];
     return (
       <div className="animated fadeIn">
         <Row>
@@ -33,21 +34,21 @@ class Tables extends Component {
                 <Table responsive>
                   <thead>
                   <tr>
-                    <th>Username</th>
+                    <th>Name</th>
                     <th>Date registered</th>
-                    <th>Role</th>
+                    <th>Create User</th>
                     <th>Status</th>
                   </tr>
                   </thead>
                   <tbody>
 
-                    {elements.map((value, index) => {
+                    {this.state.clusters.map((value, index) => {
                       return  (<tr>
-                                  <td>{value}</td>
-                                  <td>2012/01/01</td>
+                                  <td>{value.Name}</td>
+                                  <td>{value.CreatedAt}</td>
                                   <td>Member</td>
                                   <td>
-                                    <Badge color="success">Active</Badge>
+                                    <Badge color="success">{value.Status}</Badge>
                                   </td>
                                 </tr>)
                     })}
