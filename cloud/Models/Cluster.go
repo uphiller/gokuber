@@ -2,7 +2,7 @@ package Models
 
 import (
 	_ "github.com/go-sql-driver/mysql"
-	"pc/gcp/Config"
+	"pc/cloud/Config"
 )
 
 func GetClusters(b *[]Cluster) (err error) {

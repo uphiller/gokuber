@@ -8,9 +8,9 @@ import (
 	ginsession "github.com/go-session/gin-session"
 	"github.com/jinzhu/gorm"
 	"net/http"
-	"pc/gcp/Config"
-	"pc/gcp/Dto"
-	"pc/gcp/Models"
+	"pc/cloud/Config"
+	"pc/cloud/Dto"
+	"pc/cloud/Models"
 )
 
 func setupRouter() *gin.Engine {
@@ -21,7 +21,7 @@ func setupRouter() *gin.Engine {
 	config.AddAllowHeaders("authorization")
 	r.Use(cors.New(config))
 	r.Use(ginsession.New())
-	v1 := r.Group("/v1/gcp")
+	v1 := r.Group("/v1/cloud")
 	v1.Use(VerifyToken)
 	{
 		v1.GET("/clusters", getClusters)
@@ -73,7 +73,8 @@ func VerifyToken(c *gin.Context) {
 }
 
 func main() {
-	Config.DB, _ = gorm.Open("mysql", "root:1234@tcp(127.0.0.1:3306)/gcp?charset=utf8&parseTime=True&loc=Local")
+	Config.DB, _ = gorm.Open("mysql", "root:1234@tcp(127.0.0.1:3306)/gokuber?charset=utf8&parseTime=True&loc=Local")
+	Config.DB.LogMode(true)
 	defer Config.DB.Close()
 	Config.DB.AutoMigrate(&Models.Cluster{})
 	Config.DB.AutoMigrate(&Models.Secret{})
@@ -97,6 +98,7 @@ func setCluster(c *gin.Context) {
 	c.BindJSON(&clusterDto)
 	var cluster Models.Cluster
 	cluster.Name = clusterDto.Name
+	cluster.Type = clusterDto.Type
 	cluster.Status = "Active"
 	err := Models.SetCluster(&cluster)
 	if err == nil {
@@ -108,7 +110,7 @@ func setCluster(c *gin.Context) {
 
 func getSecrets(c *gin.Context) {
 	var secret []Models.Secret
-	err := Models.GetSecrets(&secret)
+	err := Models.GetSecrets(&secret, fmt.Sprint(c.MustGet("uid")))
 	if err == nil {
 		c.JSON(http.StatusOK, gin.H{
 			"secrets": secret,
@@ -121,6 +123,7 @@ func setSecret(c *gin.Context) {
 	c.BindJSON(&secretDto)
 	var secret Models.Secret
 	secret.Name = secretDto.Name
+	secret.Type = secretDto.Type
 	secret.Access_id = secretDto.Access_id
 	secret.Secret_key = secretDto.Secret_key
 	secret.User_id = fmt.Sprint(c.MustGet("uid"))

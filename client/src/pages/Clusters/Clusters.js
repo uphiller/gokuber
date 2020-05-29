@@ -32,10 +32,6 @@ class Clusters extends Component {
     });
   }
 
-  handleClick() {
-    browserHistory.push("/clusterform");
-  }
-
   render() {
     return (
       <div className="animated fadeIn">
