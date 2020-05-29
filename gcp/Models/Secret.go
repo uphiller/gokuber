@@ -5,14 +5,14 @@ import (
 	"pc/gcp/Config"
 )
 
-func GetClusters(b *[]Cluster) (err error) {
+func GetSecrets(b *[]Secret) (err error) {
 	if err = Config.DB.Find(b).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func SetCluster(b *Cluster) (err error) {
+func SetSecret(b *Secret) (err error) {
 	if err = Config.DB.Create(b).Error; err != nil {
 		return err
 	}

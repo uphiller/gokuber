@@ -9,6 +9,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"net/http"
 	"pc/gcp/Config"
+	"pc/gcp/Dto"
 	"pc/gcp/Models"
 )
 
@@ -23,7 +24,10 @@ func setupRouter() *gin.Engine {
 	v1 := r.Group("/v1/gcp")
 	v1.Use(VerifyToken)
 	{
-		v1.GET("/clusters", list)
+		v1.GET("/clusters", getClusters)
+		v1.POST("/cluster", setCluster)
+		v1.GET("/secrets", getSecrets)
+		v1.POST("/secret", setSecret)
 	}
 
 	return r
@@ -46,7 +50,6 @@ func VerifyToken(c *gin.Context) {
 	}
 
 	token, err := jwt.Parse(reqToken, func(token *jwt.Token) (interface{}, error) {
-		// Don't forget to validate the alg is what you expect:
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
@@ -73,14 +76,15 @@ func main() {
 	Config.DB, _ = gorm.Open("mysql", "root:1234@tcp(127.0.0.1:3306)/gcp?charset=utf8&parseTime=True&loc=Local")
 	defer Config.DB.Close()
 	Config.DB.AutoMigrate(&Models.Cluster{})
+	Config.DB.AutoMigrate(&Models.Secret{})
 
 	r := setupRouter()
 	r.Run(":5001")
 }
 
-func list(c *gin.Context) {
+func getClusters(c *gin.Context) {
 	var cluster []Models.Cluster
-	err := Models.GetAllCluster(&cluster)
+	err := Models.GetClusters(&cluster)
 	if err == nil {
 		c.JSON(http.StatusOK, gin.H{
 			"clusters": cluster,
@@ -88,5 +92,47 @@ func list(c *gin.Context) {
 	}
 }
 
+func setCluster(c *gin.Context) {
+	var clusterDto Dto.ClusterDto
+	c.BindJSON(&clusterDto)
+	var cluster Models.Cluster
+	cluster.Name = clusterDto.Name
+	cluster.Status = "Active"
+	err := Models.SetCluster(&cluster)
+	if err == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"clusters": cluster,
+		})
+	}
+}
+
+func getSecrets(c *gin.Context) {
+	var secret []Models.Secret
+	err := Models.GetSecrets(&secret)
+	if err == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"secrets": secret,
+		})
+	}
+}
+
+func setSecret(c *gin.Context) {
+	var secretDto Dto.SecretDto
+	c.BindJSON(&secretDto)
+	var secret Models.Secret
+	secret.Name = secretDto.Name
+	secret.Access_id = secretDto.Access_id
+	secret.Secret_key = secretDto.Secret_key
+	secret.User_id = fmt.Sprint(c.MustGet("uid"))
+
+	err := Models.SetSecret(&secret)
+	if err == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"clusters": secret,
+		})
+	}
+}
+
 //https://github.com/dedidot/gorm-gin
 //https://gorm.io/
+//https://github.com/tjrexer/react-notifications

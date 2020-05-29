@@ -14,26 +14,22 @@ import {
 } from 'reactstrap';
 import * as service from "../../rest";
 
-class Clusters extends Component {
+class Secrets extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
       error: null,
       isLoaded: false,
-      clusters: []
+      secrets: []
     };
   }
 
   async componentDidMount() {
-    let response = await service.getGcpClusters();
+    let response = await service.getSecrets();
     this.setState({
-      clusters: response.data.clusters
+      secrets: response.data.secrets
     });
-  }
-
-  handleClick() {
-    browserHistory.push("/clusterform");
   }
 
   render() {
@@ -52,21 +48,17 @@ class Clusters extends Component {
                     <th>Name</th>
                     <th>Date registered</th>
                     <th>Create User</th>
-                    <th>Status</th>
                   </tr>
                   </thead>
                   <tbody>
 
-                    {this.state.clusters.map((value, index) => {
-                      return  (<tr>
-                                  <td>{value.Name}</td>
-                                  <td>{value.CreatedAt}</td>
-                                  <td>Member</td>
-                                  <td>
-                                    <Badge color="success">{value.Status}</Badge>
-                                  </td>
-                                </tr>)
-                    })}
+                  {this.state.secrets.map((value, index) => {
+                    return  (<tr>
+                      <td>{value.Name}</td>
+                      <td>{value.CreatedAt}</td>
+                      <td>Member</td>
+                    </tr>)
+                  })}
                   </tbody>
                 </Table>
                 <Pagination>
@@ -90,8 +82,8 @@ class Clusters extends Component {
                   </PaginationItem>
                 </Pagination>
                 <Col sm xs="12" className="text-center mt-3">
-                  <Button color="primary" onClick={() => this.props.history.push('/clusterform')}>
-                    <i className="fa fa-lightbulb-o"></i>&nbsp;Create Cluster
+                  <Button color="primary" onClick={() => this.props.history.push('/secretform')}>
+                    <i className="fa fa-lightbulb-o"></i>&nbsp;Create Secret
                   </Button>
                 </Col>
               </CardBody>
@@ -104,4 +96,4 @@ class Clusters extends Component {
   }
 }
 
-export default Clusters;
+export default Secrets;

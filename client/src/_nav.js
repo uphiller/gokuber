@@ -24,6 +24,11 @@ export default {
       icon: 'icon-drop',
     },
     {
+      name: 'Secrets',
+      url: '/secrets',
+      icon: 'icon-drop',
+    },
+    {
       title: true,
       name: 'Theme',
       wrapper: {            // optional wrapper object

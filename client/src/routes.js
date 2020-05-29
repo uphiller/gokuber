@@ -37,6 +37,9 @@ const Users = React.lazy(() => import('./views/Users/Users'));
 const User = React.lazy(() => import('./views/Users/User'));
 
 const Clusters = React.lazy(() => import('./pages/Clusters'));
+const Clusterform = React.lazy(() => import('./pages/Clusterform'));
+const Secrets = React.lazy(() => import('./pages/Secrets'));
+const Secretform = React.lazy(() => import('./pages/Secretform'));
 
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
@@ -83,6 +86,9 @@ const routes = [
   { path: '/users/:id', exact: true, name: 'User Details', component: User },
 
   { path: '/clusters', exact: true, name: 'Clusters', component: Clusters },
+  { path: '/clusterform', exact: true, name: 'ClusterForm', component: Clusterform },
+  { path: '/secrets', exact: true, name: 'Secrets', component: Secrets },
+  { path: '/secretform', exact: true, name: 'Secretform', component: Secretform },
 ];
 
 export default routes;
