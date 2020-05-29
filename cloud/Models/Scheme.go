@@ -25,3 +25,12 @@ type Secret struct {
 func (b *Secret) TableName() string {
 	return "secret"
 }
+
+type Instance struct {
+	gorm.Model
+	Instance_id string `gorm:"type:varchar(50)"`
+}
+
+func (b *Instance) TableName() string {
+	return "instance"
+}

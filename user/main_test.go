@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/coreos/go-oidc"
+	"github.com/stretchr/testify/assert"
 	"golang.org/x/oauth2"
 	"log"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	// REST
@@ -64,4 +67,21 @@ func TestLoginClientCredential(t *testing.T) {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, config.AuthCodeURL(state), http.StatusFound)
 	})
+}
+
+type Account struct {
+	Name     string
+	Password string
+}
+
+func TestPingRoute(t *testing.T) {
+	router := setupRouter()
+	account := Account{"admin", "admin"}
+	pbytes, _ := json.Marshal(account)
+	buff := bytes.NewBuffer(pbytes)
+	w := httptest.NewRecorder()
+	resp, _ := http.NewRequest("POST", "/v1/auth/login", buff)
+	router.ServeHTTP(w, resp)
+	log.Print(w.Body)
+	assert.Equal(t, 200, w.Code)
 }

@@ -11,7 +11,7 @@ func TestPingRoute(t *testing.T) {
 	router := setupRouter()
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/v1/health", nil)
+	req, _ := http.NewRequest("POST", "/v1/aws/cluster", nil)
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)

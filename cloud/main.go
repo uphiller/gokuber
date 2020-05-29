@@ -22,6 +22,7 @@ func setupRouter() *gin.Engine {
 	r.Use(cors.New(config))
 	r.Use(ginsession.New())
 	v1 := r.Group("/v1/cloud")
+	v1.GET("/health", health)
 	v1.Use(VerifyToken)
 	{
 		v1.GET("/clusters", getClusters)
@@ -31,6 +32,12 @@ func setupRouter() *gin.Engine {
 	}
 
 	return r
+}
+
+func health(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"message": "ok",
+	})
 }
 
 func VerifyToken(c *gin.Context) {
@@ -78,6 +85,7 @@ func main() {
 	defer Config.DB.Close()
 	Config.DB.AutoMigrate(&Models.Cluster{})
 	Config.DB.AutoMigrate(&Models.Secret{})
+	Config.DB.AutoMigrate(&Models.Instance{})
 
 	r := setupRouter()
 	r.Run(":5001")
@@ -101,9 +109,31 @@ func setCluster(c *gin.Context) {
 	cluster.Type = clusterDto.Type
 	cluster.Status = "Active"
 	err := Models.SetCluster(&cluster)
+
+	/*resp, err := resty.R().
+		SetHeader("Content-Type", "application/json").
+		SetFormData(map[string]string{
+			"test": "1234",
+		}).Post("http://localhost:5002/v1/aws/cluster")
+	if err != nil {
+		print(err)
+	}
+
+	var result map[string]interface{}
+	if err := json.Unmarshal(resp.Body(), &result); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"result": err,
+		})
+	}
+	if result["error"] != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"result": err,
+		})
+	}*/
+
 	if err == nil {
 		c.JSON(http.StatusOK, gin.H{
-			"clusters": cluster,
+			"cluster": cluster,
 		})
 	}
 }
