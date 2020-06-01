@@ -1,6 +1,8 @@
 package Models
 
-import "github.com/jinzhu/gorm"
+import (
+	"github.com/jinzhu/gorm"
+)
 
 type Cluster struct {
 	gorm.Model
@@ -28,6 +30,7 @@ func (b *Secret) TableName() string {
 
 type Instance struct {
 	gorm.Model
+	Cluster_id  uint
 	Instance_id string `gorm:"type:varchar(50)"`
 }
 

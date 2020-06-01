@@ -74,14 +74,20 @@ type Account struct {
 	Password string
 }
 
+type Token struct {
+	Access_token string `json:"access_token"`
+}
+
 func TestPingRoute(t *testing.T) {
 	router := setupRouter()
 	account := Account{"admin", "admin"}
 	pbytes, _ := json.Marshal(account)
 	buff := bytes.NewBuffer(pbytes)
-	w := httptest.NewRecorder()
-	resp, _ := http.NewRequest("POST", "/v1/auth/login", buff)
-	router.ServeHTTP(w, resp)
-	log.Print(w.Body)
-	assert.Equal(t, 200, w.Code)
+	resp := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/v1/auth/login", buff)
+	router.ServeHTTP(resp, req)
+	var token Token
+	json.Unmarshal(resp.Body.Bytes(), &token)
+	log.Print(token.Access_token)
+	assert.Equal(t, 200, resp.Code)
 }

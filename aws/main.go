@@ -34,7 +34,7 @@ func health(c *gin.Context) {
 func setCluster(c *gin.Context) {
 	sess, err := session.NewSession(&aws.Config{
 		Region:      aws.String("ap-northeast-2"),
-		Credentials: credentials.NewStaticCredentials("AKIAS2KAI3ZLLOUPD7QQ", "An/sjce+59jTpuXEYDDqf8mxku1axAkPocJmReU7", ""),
+		Credentials: credentials.NewStaticCredentials("AKIAS2KAI3ZLCSAQM4XK", "wefJ463O9loXFqBGP6nGe0LJj3cAle9uOtFaTx58", ""),
 	})
 
 	svc := ec2.New(sess)

@@ -1,12 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	ginsession "github.com/go-session/gin-session"
 	"github.com/jinzhu/gorm"
+	"gopkg.in/resty.v1"
 	"net/http"
 	"pc/cloud/Config"
 	"pc/cloud/Dto"
@@ -110,11 +112,11 @@ func setCluster(c *gin.Context) {
 	cluster.Status = "Active"
 	err := Models.SetCluster(&cluster)
 
-	/*resp, err := resty.R().
+	resp, err := resty.R().
 		SetHeader("Content-Type", "application/json").
 		SetFormData(map[string]string{
 			"test": "1234",
-		}).Post("http://localhost:5002/v1/aws/cluster")
+		}).Post("http://localhost:5002/v1/" + cluster.Type + "/cluster")
 	if err != nil {
 		print(err)
 	}
@@ -129,12 +131,16 @@ func setCluster(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"result": err,
 		})
-	}*/
-
-	if err == nil {
-		c.JSON(http.StatusOK, gin.H{
-			"cluster": cluster,
-		})
+	} else {
+		var instance Models.Instance
+		instance.Cluster_id = cluster.ID
+		instance.Instance_id = fmt.Sprint(result["instance_id"])
+		err := Models.SetInstance(&instance)
+		if err == nil {
+			c.JSON(http.StatusOK, gin.H{
+				"cluster": cluster,
+			})
+		}
 	}
 }
 
@@ -161,7 +167,7 @@ func setSecret(c *gin.Context) {
 	err := Models.SetSecret(&secret)
 	if err == nil {
 		c.JSON(http.StatusOK, gin.H{
-			"clusters": secret,
+			"secret": secret,
 		})
 	}
 }
