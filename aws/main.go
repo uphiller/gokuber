@@ -31,10 +31,18 @@ func health(c *gin.Context) {
 	})
 }
 
+type Account struct {
+	Id     string `json:"id"`
+	Secret string `json:"secret"`
+}
+
 func setCluster(c *gin.Context) {
+	var account Account
+	c.BindJSON(&account)
+
 	sess, err := session.NewSession(&aws.Config{
 		Region:      aws.String("ap-northeast-2"),
-		Credentials: credentials.NewStaticCredentials("AKIAS2KAI3ZLCSAQM4XK", "wefJ463O9loXFqBGP6nGe0LJj3cAle9uOtFaTx58", ""),
+		Credentials: credentials.NewStaticCredentials(account.Id, account.Secret, ""),
 	})
 
 	svc := ec2.New(sess)

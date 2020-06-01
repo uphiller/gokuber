@@ -109,44 +109,60 @@ func setCluster(c *gin.Context) {
 	var cluster Models.Cluster
 	cluster.Name = clusterDto.Name
 	cluster.Type = clusterDto.Type
+	cluster.Secret_id = clusterDto.Secret_id
 	cluster.Status = "Active"
-	err := Models.SetCluster(&cluster)
+	Models.SetCluster(&cluster)
 
-	resp, err := resty.R().
-		SetHeader("Content-Type", "application/json").
-		SetFormData(map[string]string{
-			"test": "1234",
-		}).Post("http://localhost:5002/v1/" + cluster.Type + "/cluster")
-	if err != nil {
-		print(err)
-	}
+	var secret Models.Secret
+	var param Models.Secret
+	param.ID = cluster.Secret_id
 
-	var result map[string]interface{}
-	if err := json.Unmarshal(resp.Body(), &result); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"result": err,
-		})
-	}
-	if result["error"] != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"result": err,
-		})
-	} else {
-		var instance Models.Instance
-		instance.Cluster_id = cluster.ID
-		instance.Instance_id = fmt.Sprint(result["instance_id"])
-		err := Models.SetInstance(&instance)
-		if err == nil {
-			c.JSON(http.StatusOK, gin.H{
-				"cluster": cluster,
+	getSecret_err := Models.GetSecret(&secret, &param)
+	if getSecret_err == nil {
+		resp, err := resty.R().
+			SetHeader("Content-Type", "application/json").
+			SetBody(map[string]string{
+				"id":     secret.Access_id,
+				"secret": secret.Secret_key,
+			}).Post("http://localhost:5002/v1/" + cluster.Type + "/cluster")
+		if err != nil {
+			print(err)
+		}
+
+		var result map[string]interface{}
+		if err := json.Unmarshal(resp.Body(), &result); err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"result": err,
 			})
 		}
+		if result["error"] != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"result": err,
+			})
+		} else {
+			var instance Models.Instance
+			instance.Cluster_id = cluster.ID
+			instance.Instance_id = fmt.Sprint(result["instance_id"])
+			err := Models.SetInstance(&instance)
+			if err == nil {
+				c.JSON(http.StatusOK, gin.H{
+					"cluster": cluster,
+				})
+			}
+		}
 	}
+
 }
 
 func getSecrets(c *gin.Context) {
 	var secret []Models.Secret
-	err := Models.GetSecrets(&secret, fmt.Sprint(c.MustGet("uid")))
+	var param Models.Secret
+	param.User_id = fmt.Sprint(c.MustGet("uid"))
+	cloud_type := c.Query("type")
+	if cloud_type != "" {
+		param.Type = cloud_type
+	}
+	err := Models.GetSecrets(&secret, &param)
 	if err == nil {
 		c.JSON(http.StatusOK, gin.H{
 			"secrets": secret,

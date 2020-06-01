@@ -6,9 +6,10 @@ import (
 
 type Cluster struct {
 	gorm.Model
-	Name   string `gorm:"type:varchar(50)"`
-	Type   string `gorm:"type:varchar(10)"`
-	Status string `gorm:"type:varchar(50)"`
+	Name      string `gorm:"type:varchar(50)"`
+	Type      string `gorm:"type:varchar(10)"`
+	Status    string `gorm:"type:varchar(50)"`
+	Secret_id uint
 }
 
 func (b *Cluster) TableName() string {

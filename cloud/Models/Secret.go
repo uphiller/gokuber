@@ -12,8 +12,15 @@ func SetSecret(b *Secret) (err error) {
 	return nil
 }
 
-func GetSecrets(b *[]Secret, user_id string) (err error) {
-	if err := Config.DB.Where("user_id = ?", user_id).First(b).Error; err != nil {
+func GetSecrets(b *[]Secret, param *Secret) (err error) {
+	if err := Config.DB.Where(param).Find(b).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetSecret(b *Secret, param *Secret) (err error) {
+	if err := Config.DB.Where(param).First(b).Error; err != nil {
 		return err
 	}
 	return nil
